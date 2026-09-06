@@ -1,0 +1,30 @@
+# Конфиг детекции и трекинга, см. services/perception/detect.py и track.py.
+# Веса — результат обучения в notebooks/ (см. docs/04-metrics.md, раздел 1),
+# в репозитории их нет: detect.py честно падает с понятной ошибкой, если
+# файл весов отсутствует, а не тихо скачивает generic-модель из интернета.
+
+detector:
+  weights_path: models/yolo11n_construction.pt
+  imgsz: 640
+  conf_threshold: 0.35
+  iou_threshold: 0.5
+  device: cpu
+  batch_size: 8
+
+tracker:
+  # Имя встроенного трекера ultralytics (BoT-SORT) или путь к своему YAML.
+  name: botsort.yaml
+  # Порог собственной склейки разрывов track_id поверх BoT-SORT (см. track.py) —
+  # трекер ultralytics ассоциирует только соседние кадры плотного видео,
+  # склейку по времени (до скольки секунд считать один и тот же объект)
+  # делает TrackStitcher.
+  max_gap_seconds: 60
+  # Порог расстояния между центроидами (px) для склейки одного класса в одной зоне.
+  max_centroid_distance_px: 80
+
+state:
+  model_path: models/state.joblib
+  # Окно расчёта признаков движения (MAD центроида/площади, поток, HSV), сек.
+  feature_window_sec: 90
+  # Правило "простой": без движения дольше этого срока -> parked, независимо от модели.
+  parked_after_hours: 2.0

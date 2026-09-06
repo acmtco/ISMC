@@ -1,0 +1,32 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    profiles: ["dev", "demo"]
+    ports:
+      - "${HG_API_PORT:-8000}:8000"
+    environment:
+      HG_MODE: ${HG_MODE:-replay}
+      HG_DATA_DIR: /data
+      HG_CONFIG_DIR: /app/config
+      HG_DB_URL: ${HG_DB_URL:-sqlite:////data/hronograf.db}
+      HG_OBJECT_ID: ${HG_OBJECT_ID:-OBJ-001}
+      HG_LOG_LEVEL: ${HG_LOG_LEVEL:-INFO}
+    volumes:
+      - ./data:/data
+      - ./config:/app/config
+
+  web:
+    build:
+      context: ./web
+    profiles: ["dev", "demo"]
+    ports:
+      - "${HG_WEB_PORT:-5173}:5173"
+    environment:
+      VITE_API_URL: ${HG_API_URL:-http://localhost:8000}
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    depends_on:
+      - api

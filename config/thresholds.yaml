@@ -1,0 +1,39 @@
+# Пороги правил отклонений, см. docs/03-deviation-rules.md, шаг 3.
+# Ни одного магического числа в коде — только здесь.
+
+r1_resource_gap:
+  fact_vs_plan_ratio: 0.7   # mh_fact_день(c) < 0.7 * mh_plan_день(c)
+  min_consecutive_days: 2
+  min_coverage: 0.6
+  high_severity_delay_days: 3
+
+r2_idle:
+  utilization_max: 0.5      # КИТ = mh_active / mh_present
+  min_mh_present_per_shift: 4.0
+  # Порог убытка от простоя за непрерывный период отклонения -> severity=high
+  high_severity_period_cost_rub: 50000
+
+r3_front_mismatch:
+  low_match_score: 0.35
+  competing_match_score: 0.6
+  high_severity_min_days: 3
+
+r4_silence:
+  min_consecutive_days: 2
+  min_coverage: 0.8
+
+r0_low_confidence:
+  min_coverage: 0.6
+  min_quality_score: 0.5
+
+spi:
+  green_min: 0.95
+  yellow_min: 0.80
+
+forecast:
+  # Окно скользящего среднего темпа mh_active, суток (docs/03, шаг 4).
+  rate_window_days: 7
+  # Обратная задача: сколько маш.-ч/сутки даёт ОДНА дополнительная единица
+  # техники при полной смене — упрощение (полная смена без простоев),
+  # честно консервативно завышает эффект добавленной техники.
+  shift_hours: 8.0

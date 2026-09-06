@@ -1,0 +1,29 @@
+{
+  "object_id": "OBJ-001",
+  "name": "Жилой комплекс, корпус 3",
+  "address": "г. Москва, синтетический полигон",
+  "timezone": "Europe/Moscow",
+  "cameras": [
+    {
+      "camera_id": "CAM-01",
+      "title": "Северный ракурс",
+      "source": {"kind": "replay", "uri": "data/synthetic/CAM-01/"},
+      "capture_interval_sec": 1200,
+      "zones": [
+        {
+          "zone_id": "Z-PIT",
+          "title": "Котлован",
+          "polygon": [[60, 300], [560, 295], [600, 480], [40, 490]],
+          "area_m2": 2400
+        },
+        {
+          "zone_id": "Z-FRAME",
+          "title": "Каркас",
+          "polygon": [[620, 200], [930, 200], [930, 480], [620, 480]],
+          "area_m2": 1600
+        }
+      ],
+      "homography": null
+    }
+  ]
+}

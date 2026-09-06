@@ -1,0 +1,98 @@
+# Демонстрационный сценарий для scripts/make_synthetic.py.
+# Не часть основного контракта данных (docs/02) — формат касается только генератора.
+#
+# Даты и параметры отклонения INJ-0002 намеренно повторяют пример из
+# docs/02-data-contract.md (раздел 6, D-0007): 1 экскаватор вместо 2,
+# 2 самосвала вместо 5, 18-20 сентября — чтобы карточку из документа можно
+# было воспроизвести на этом бенчмарке.
+
+seed: 42
+days: 30
+object_id: OBJ-001
+camera_id: CAM-01
+start_date: "2026-09-08"
+frame_size: [960, 540]
+capture_interval_min: 20
+day_start_hour: 7
+day_end_hour: 18
+night_frames_per_night: 2
+
+zones:
+  - zone_id: Z-PIT
+    polygon: [[60, 300], [560, 295], [600, 480], [40, 490]]
+  - zone_id: Z-FRAME
+    polygon: [[620, 200], [930, 200], [930, 480], [620, 480]]
+
+work_types:
+  - work_type: earthworks_excavation
+    zone_id: Z-PIT
+    classes:
+      excavator: {count: 2, active_ratio: 0.65}
+      dump_truck: {count: 5, active_ratio: 0.55}
+      bulldozer: {count: 1, active_ratio: 0.40}
+    active_hours: [[7, 17]]
+  - work_type: frame_assembly
+    zone_id: Z-FRAME
+    classes:
+      tower_crane: {count: 1, active_ratio: 0.50}
+      mobile_crane: {count: 1, active_ratio: 0.35}
+      loader: {count: 1, active_ratio: 0.40}
+    active_hours: [[8, 18]]
+
+schedule:
+  - work_id: W-014
+    work_type: earthworks_excavation
+    zone_id: Z-PIT
+    date_from: "2026-09-15"
+    date_to: "2026-10-02"
+  - work_id: W-101
+    work_type: frame_assembly
+    zone_id: Z-FRAME
+    date_from: "2026-09-08"
+    date_to: "2026-10-07"
+
+# Внедрённые отклонения — единственный источник истины для eval_end2end.py.
+injected_deviations:
+  - deviation_id: INJ-0001
+    type: R4_silence
+    work_id: W-101
+    zone_id: Z-FRAME
+    date_from: "2026-09-08"
+    date_to: "2026-09-09"
+    severity: high
+    params: {}
+  - deviation_id: INJ-0002
+    type: R1_resource_gap
+    work_id: W-014
+    zone_id: Z-PIT
+    date_from: "2026-09-18"
+    date_to: "2026-09-20"
+    severity: high
+    params:
+      counts: {excavator: 1, dump_truck: 2}
+  - deviation_id: INJ-0003
+    type: R2_idle
+    work_id: W-014
+    zone_id: Z-PIT
+    date_from: "2026-09-25"
+    date_to: "2026-09-27"
+    severity: medium
+    params:
+      active_ratio: {excavator: 0.12, dump_truck: 0.15}
+  - deviation_id: INJ-0004
+    type: R3_front_mismatch
+    work_id: W-101
+    zone_id: Z-FRAME
+    date_from: "2026-10-01"
+    date_to: "2026-10-03"
+    severity: medium
+    params:
+      extra_classes: {bulldozer: 1}
+
+weather:
+  - date_from: "2026-09-12"
+    date_to: "2026-09-12"
+    condition: rain
+  - date_from: "2026-09-22"
+    date_to: "2026-09-22"
+    condition: fog

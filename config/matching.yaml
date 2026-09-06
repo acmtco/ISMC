@@ -1,0 +1,13 @@
+# Веса для match_score, см. docs/03-deviation-rules.md, шаг 2.
+# match_score(w) = weights.cover * cover + weights.rhythm * rhythm + weights.excess * (1 - excess)
+weights:
+  cover: 0.55
+  rhythm: 0.25
+  excess: 0.20
+
+# Порог, ниже которого работа не считается уверенно определённой -> R0_low_confidence
+low_confidence_threshold: 0.35
+
+# excess(w) = Σ_forbidden o_c / (Σ_c o_c + epsilon) — защита от деления на ноль,
+# когда в зоне вообще не наблюдается техники.
+epsilon: 0.000001

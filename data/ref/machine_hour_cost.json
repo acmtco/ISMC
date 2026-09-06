@@ -1,0 +1,16 @@
+{
+  "_source": "Оценка по рыночным ставкам аренды техники с оператором и топливом, не является проверенным источником — сверить перед использованием в питче (docs/04-metrics.md, раздел 8, «откуда вы это взяли»).",
+  "currency": "RUB",
+  "cost_per_machine_hour": {
+    "excavator": 2500,
+    "dump_truck": 1800,
+    "concrete_mixer": 2200,
+    "concrete_pump": 4500,
+    "tower_crane": 3500,
+    "mobile_crane": 3000,
+    "bulldozer": 2800,
+    "roller": 1500,
+    "loader": 1700,
+    "drilling_rig": 5000
+  }
+}

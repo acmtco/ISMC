@@ -1,0 +1,8 @@
+# Настройки services/api. Ни одного магического числа в коде.
+
+scheduler:
+  # Опрос камер в режиме HG_MODE=live, секунд между тиками.
+  poll_interval_sec: 300
+  # Ночной пересчёт machine_hours/deviations — время по объекту (Europe/Moscow).
+  nightly_hour: 2
+  nightly_minute: 0

@@ -1,0 +1,1668 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Хронограф API",
+    "description": "Превращаем видеопоток строительной площадки в машино-часы и автоматически сверяем их с календарным графиком — типизированные отклонения с доказательствами и прогнозом срыва срока.\n\nКонтракты данных — `docs/02-data-contract.md`, правила отклонений — `docs/03-deviation-rules.md`.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/objects": {
+      "get": {
+        "tags": [
+          "Объекты"
+        ],
+        "summary": "Список объектов строительства",
+        "description": "Все объекты, зарегистрированные в системе.",
+        "operationId": "list_objects_endpoint_api_objects_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ObjectOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Objects Endpoint Api Objects Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/objects/{object_id}": {
+      "get": {
+        "tags": [
+          "Объекты"
+        ],
+        "summary": "Карточка объекта",
+        "description": "Объект вместе с камерами и зонами выполнения работ.",
+        "operationId": "get_object_endpoint_api_objects__object_id__get",
+        "parameters": [
+          {
+            "name": "object_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Object Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectDetailOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/objects/{object_id}/live": {
+      "get": {
+        "tags": [
+          "Объекты"
+        ],
+        "summary": "Текущее состояние площадки",
+        "description": "Последний кадр по каждой камере объекта: детекции, зоны, состояние техники.",
+        "operationId": "get_live_endpoint_api_objects__object_id__live_get",
+        "parameters": [
+          {
+            "name": "object_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Object Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveStateOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/objects/{object_id}/gantt": {
+      "get": {
+        "tags": [
+          "Объекты"
+        ],
+        "summary": "План vs факт по работам",
+        "description": "Диаграмма Ганта: плановые и фактические машино-часы, прогноз завершения, SPI.",
+        "operationId": "get_gantt_endpoint_api_objects__object_id__gantt_get",
+        "parameters": [
+          {
+            "name": "object_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Object Id"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "description": "Начало периода",
+              "title": "From"
+            },
+            "description": "Начало периода"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "description": "Конец периода (на эту дату считается прогресс)",
+              "title": "To"
+            },
+            "description": "Конец периода (на эту дату считается прогресс)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GanttOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/objects/{object_id}/economics": {
+      "get": {
+        "tags": [
+          "Объекты"
+        ],
+        "summary": "Экономика: КИТ, простои, рубли",
+        "description": "Коэффициент использования техники и стоимость простоя за период.",
+        "operationId": "get_economics_endpoint_api_objects__object_id__economics_get",
+        "parameters": [
+          {
+            "name": "object_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Object Id"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "description": "Начало периода",
+              "title": "From"
+            },
+            "description": "Начало периода"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "description": "Конец периода",
+              "title": "To"
+            },
+            "description": "Конец периода"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EconomicsOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/objects/{object_id}/schedule": {
+      "post": {
+        "tags": [
+          "Объекты"
+        ],
+        "summary": "Импорт графика (XLSX / MS Project XML)",
+        "description": "Заменяет график объекта данными из загруженного файла — нечёткое сопоставление колонок, см. `services/analytics/schedule_io.py`.",
+        "operationId": "import_schedule_endpoint_api_objects__object_id__schedule_post",
+        "parameters": [
+          {
+            "name": "object_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Object Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_import_schedule_endpoint_api_objects__object_id__schedule_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleImportResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/objects/{object_id}/deviations": {
+      "get": {
+        "tags": [
+          "Отклонения"
+        ],
+        "summary": "Лента отклонений",
+        "description": "Отклонения по объекту, опционально отфильтрованные по типу (R0-R4).",
+        "operationId": "list_deviations_endpoint_api_objects__object_id__deviations_get",
+        "parameters": [
+          {
+            "name": "object_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Object Id"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Фильтр по типу отклонения",
+              "title": "Type"
+            },
+            "description": "Фильтр по типу отклонения"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DeviationOut"
+                  },
+                  "title": "Response List Deviations Endpoint Api Objects  Object Id  Deviations Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/deviations/{deviation_id}": {
+      "get": {
+        "tags": [
+          "Отклонения"
+        ],
+        "summary": "Карточка отклонения с доказательствами",
+        "description": "Числа плана и факта, формулировка на русском, рекомендация, кадры-улики.",
+        "operationId": "get_deviation_endpoint_api_deviations__deviation_id__get",
+        "parameters": [
+          {
+            "name": "deviation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Deviation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviationOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/deviations/{deviation_id}/act": {
+      "post": {
+        "tags": [
+          "Отклонения"
+        ],
+        "summary": "Сформировать PDF-акт",
+        "description": "Формирует PDF-акт по отклонению для передачи подрядчику; отклонение помечается как `acted`.",
+        "operationId": "create_act_endpoint_api_deviations__deviation_id__act_post",
+        "parameters": [
+          {
+            "name": "deviation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Deviation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "application/pdf": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cameras/{camera_id}/zones": {
+      "post": {
+        "tags": [
+          "Камеры"
+        ],
+        "summary": "Сохранить полигоны зон",
+        "description": "Полная замена разметки зон выполнения работ для камеры.",
+        "operationId": "update_zones_endpoint_api_cameras__camera_id__zones_post",
+        "parameters": [
+          {
+            "name": "camera_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Camera Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ZoneIn"
+                },
+                "title": "Zones"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZonesUpdateResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/objects/{object_id}/replay": {
+      "get": {
+        "tags": [
+          "Машина времени"
+        ],
+        "summary": "Машина времени: проигрывание предрассчитанного периода",
+        "description": "Server-Sent Events: кадры с детекциями объекта за период `from`-`to`, воспроизведённые с ускорением `speed` (во сколько раз быстрее реального времени; по умолчанию — `HG_REPLAY_SPEED`). Каждое событие `frame` — один кадр по контракту `detections.jsonl`; в конце — событие `end`.",
+        "operationId": "replay_endpoint_api_objects__object_id__replay_get",
+        "parameters": [
+          {
+            "name": "object_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Object Id"
+            }
+          },
+          {
+            "name": "speed",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Ускорение воспроизведения",
+              "title": "Speed"
+            },
+            "description": "Ускорение воспроизведения"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Начало периода",
+              "title": "From"
+            },
+            "description": "Начало периода"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Конец периода",
+              "title": "To"
+            },
+            "description": "Конец периода"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Служебное"
+        ],
+        "summary": "Проверка живости сервиса",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Body_import_schedule_endpoint_api_objects__object_id__schedule_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_import_schedule_endpoint_api_objects__object_id__schedule_post"
+      },
+      "CameraOut": {
+        "properties": {
+          "camera_id": {
+            "type": "string",
+            "title": "Camera Id",
+            "description": "Идентификатор камеры"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Название ракурса",
+            "default": ""
+          },
+          "source_kind": {
+            "type": "string",
+            "title": "Source Kind",
+            "description": "Тип источника: rtsp | hls | folder | replay"
+          },
+          "source_uri": {
+            "type": "string",
+            "title": "Source Uri",
+            "description": "Адрес источника кадров"
+          },
+          "capture_interval_sec": {
+            "type": "integer",
+            "title": "Capture Interval Sec",
+            "description": "Номинальный интервал съёмки, сек"
+          },
+          "zones": {
+            "items": {
+              "$ref": "#/components/schemas/ZoneOut"
+            },
+            "type": "array",
+            "title": "Zones",
+            "description": "Зоны выполнения работ этой камеры"
+          }
+        },
+        "type": "object",
+        "required": [
+          "camera_id",
+          "source_kind",
+          "source_uri",
+          "capture_interval_sec"
+        ],
+        "title": "CameraOut"
+      },
+      "DetectedObjectOut": {
+        "properties": {
+          "track_id": {
+            "type": "integer",
+            "title": "Track Id",
+            "description": "Стабильный идентификатор трека"
+          },
+          "cls": {
+            "type": "string",
+            "title": "Cls",
+            "description": "Класс техники"
+          },
+          "conf": {
+            "type": "number",
+            "title": "Conf",
+            "description": "Уверенность детектора, 0..1"
+          },
+          "bbox": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Bbox",
+            "description": "Бокс [x, y, ширина, высота] в пикселях кадра"
+          },
+          "zone_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zone Id",
+            "description": "Зона, в которой находится техника"
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "description": "Состояние: active | idle | parked | unknown"
+          },
+          "state_conf": {
+            "type": "number",
+            "title": "State Conf",
+            "description": "Уверенность классификатора состояния, 0..1"
+          },
+          "features": {
+            "$ref": "#/components/schemas/FeaturesOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "track_id",
+          "cls",
+          "conf",
+          "bbox",
+          "state",
+          "state_conf",
+          "features"
+        ],
+        "title": "DetectedObjectOut"
+      },
+      "DetectionFrameOut": {
+        "properties": {
+          "camera_id": {
+            "type": "string",
+            "title": "Camera Id",
+            "description": "Камера, снявшая кадр"
+          },
+          "ts": {
+            "type": "string",
+            "title": "Ts",
+            "description": "Время кадра, ISO 8601, +03:00"
+          },
+          "frame_uri": {
+            "type": "string",
+            "title": "Frame Uri",
+            "description": "Путь к файлу кадра"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/QualityOut"
+          },
+          "objects": {
+            "items": {
+              "$ref": "#/components/schemas/DetectedObjectOut"
+            },
+            "type": "array",
+            "title": "Objects"
+          }
+        },
+        "type": "object",
+        "required": [
+          "camera_id",
+          "ts",
+          "frame_uri",
+          "quality"
+        ],
+        "title": "DetectionFrameOut"
+      },
+      "DeviationOut": {
+        "properties": {
+          "deviation_id": {
+            "type": "string",
+            "title": "Deviation Id",
+            "description": "Идентификатор отклонения"
+          },
+          "detected_at": {
+            "type": "string",
+            "title": "Detected At",
+            "description": "Когда отклонение обнаружено, ISO 8601"
+          },
+          "period": {
+            "$ref": "#/components/schemas/PeriodOut"
+          },
+          "work_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Work Id",
+            "description": "Работа графика, к которой относится отклонение"
+          },
+          "zone_id": {
+            "type": "string",
+            "title": "Zone Id",
+            "description": "Зона, в которой обнаружено отклонение"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Тип: R0_low_confidence | R1_resource_gap | R2_idle | R3_front_mismatch | R4_silence"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity",
+            "description": "Серьёзность: low | medium | high"
+          },
+          "observed": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Observed",
+            "description": "Факт (числа плана/факта по контексту типа)"
+          },
+          "expected": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Expected",
+            "description": "План/ожидание по контексту типа"
+          },
+          "impact": {
+            "$ref": "#/components/schemas/ImpactOut"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation",
+            "description": "Формулировка на русском для прораба"
+          },
+          "recommendation": {
+            "type": "string",
+            "title": "Recommendation",
+            "description": "Рекомендация на русском"
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/EvidenceOut"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "open — новое, acted — по нему сформирован акт",
+            "default": "open"
+          }
+        },
+        "type": "object",
+        "required": [
+          "deviation_id",
+          "detected_at",
+          "period",
+          "zone_id",
+          "type",
+          "severity",
+          "impact",
+          "explanation",
+          "recommendation",
+          "evidence"
+        ],
+        "title": "DeviationOut"
+      },
+      "EconomicsOut": {
+        "properties": {
+          "object_id": {
+            "type": "string",
+            "title": "Object Id"
+          },
+          "period": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Period",
+            "description": "Запрошенный период {from, to}"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "default": "RUB"
+          },
+          "total_idle_cost_rub": {
+            "type": "number",
+            "title": "Total Idle Cost Rub",
+            "description": "Суммарные потери от простоя за период, ₽"
+          },
+          "by_class": {
+            "items": {
+              "$ref": "#/components/schemas/UtilizationRowOut"
+            },
+            "type": "array",
+            "title": "By Class"
+          }
+        },
+        "type": "object",
+        "required": [
+          "object_id",
+          "period",
+          "total_idle_cost_rub",
+          "by_class"
+        ],
+        "title": "EconomicsOut"
+      },
+      "EvidenceOut": {
+        "properties": {
+          "frames": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Frames",
+            "description": "Кадры-улики"
+          },
+          "chart": {
+            "type": "string",
+            "title": "Chart",
+            "description": "Какой график показать в карточке",
+            "default": "mh_plan_vs_fact"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence",
+            "description": "Уверенность системы в отклонении, 0..1"
+          }
+        },
+        "type": "object",
+        "required": [
+          "confidence"
+        ],
+        "title": "EvidenceOut"
+      },
+      "FeaturesOut": {
+        "properties": {
+          "centroid_mad": {
+            "type": "number",
+            "title": "Centroid Mad",
+            "description": "MAD смещения центра нижней грани бокса за окно"
+          },
+          "area_mad": {
+            "type": "number",
+            "title": "Area Mad",
+            "description": "MAD площади бокса за окно"
+          },
+          "flow_mag": {
+            "type": "number",
+            "title": "Flow Mag",
+            "description": "Средняя величина оптического потока внутри бокса"
+          },
+          "hsv_var": {
+            "type": "number",
+            "title": "Hsv Var",
+            "description": "Пространственная дисперсия HSV внутри бокса"
+          }
+        },
+        "type": "object",
+        "required": [
+          "centroid_mad",
+          "area_mad",
+          "flow_mag",
+          "hsv_var"
+        ],
+        "title": "FeaturesOut"
+      },
+      "GanttOut": {
+        "properties": {
+          "object_id": {
+            "type": "string",
+            "title": "Object Id"
+          },
+          "period": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Period",
+            "description": "Запрошенный период {from, to}"
+          },
+          "works": {
+            "items": {
+              "$ref": "#/components/schemas/WorkProgressOut"
+            },
+            "type": "array",
+            "title": "Works"
+          }
+        },
+        "type": "object",
+        "required": [
+          "object_id",
+          "period",
+          "works"
+        ],
+        "title": "GanttOut"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ImpactOut": {
+        "properties": {
+          "spi": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spi",
+            "description": "Индекс выполнения по срокам на момент детекции"
+          },
+          "delay_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delay Days",
+            "description": "Прогнозное отставание, суток"
+          },
+          "idle_cost_rub": {
+            "type": "number",
+            "title": "Idle Cost Rub",
+            "description": "Стоимость простоя за период, ₽",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "title": "ImpactOut"
+      },
+      "LiveStateOut": {
+        "properties": {
+          "object_id": {
+            "type": "string",
+            "title": "Object Id",
+            "description": "Идентификатор объекта"
+          },
+          "ts": {
+            "type": "string",
+            "title": "Ts",
+            "description": "Время формирования ответа, ISO 8601"
+          },
+          "cameras": {
+            "items": {
+              "$ref": "#/components/schemas/DetectionFrameOut"
+            },
+            "type": "array",
+            "title": "Cameras",
+            "description": "Последний известный кадр по каждой камере объекта"
+          }
+        },
+        "type": "object",
+        "required": [
+          "object_id",
+          "ts"
+        ],
+        "title": "LiveStateOut"
+      },
+      "ObjectDetailOut": {
+        "properties": {
+          "object_id": {
+            "type": "string",
+            "title": "Object Id",
+            "description": "Идентификатор объекта строительства"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Название объекта"
+          },
+          "address": {
+            "type": "string",
+            "title": "Address",
+            "description": "Адрес объекта",
+            "default": ""
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone",
+            "description": "Часовой пояс объекта",
+            "default": "Europe/Moscow"
+          },
+          "cameras": {
+            "items": {
+              "$ref": "#/components/schemas/CameraOut"
+            },
+            "type": "array",
+            "title": "Cameras",
+            "description": "Камеры объекта"
+          }
+        },
+        "type": "object",
+        "required": [
+          "object_id",
+          "name"
+        ],
+        "title": "ObjectDetailOut"
+      },
+      "ObjectOut": {
+        "properties": {
+          "object_id": {
+            "type": "string",
+            "title": "Object Id",
+            "description": "Идентификатор объекта строительства"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Название объекта"
+          },
+          "address": {
+            "type": "string",
+            "title": "Address",
+            "description": "Адрес объекта",
+            "default": ""
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone",
+            "description": "Часовой пояс объекта",
+            "default": "Europe/Moscow"
+          }
+        },
+        "type": "object",
+        "required": [
+          "object_id",
+          "name"
+        ],
+        "title": "ObjectOut"
+      },
+      "PeriodOut": {
+        "properties": {
+          "from": {
+            "type": "string",
+            "title": "From",
+            "description": "Начало периода отклонения"
+          },
+          "to": {
+            "type": "string",
+            "title": "To",
+            "description": "Конец периода отклонения"
+          }
+        },
+        "type": "object",
+        "required": [
+          "from",
+          "to"
+        ],
+        "title": "PeriodOut"
+      },
+      "QualityOut": {
+        "properties": {
+          "blur": {
+            "type": "number",
+            "title": "Blur",
+            "description": "Размытость кадра, 0 — резкий, 1 — сильно размыт"
+          },
+          "night": {
+            "type": "boolean",
+            "title": "Night",
+            "description": "Признак ночного кадра"
+          },
+          "occlusion": {
+            "type": "number",
+            "title": "Occlusion",
+            "description": "Доля кадра, закрытая помехой (грязный объектив и т.п.)"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score",
+            "description": "Итоговая оценка качества кадра, 0..1"
+          }
+        },
+        "type": "object",
+        "required": [
+          "blur",
+          "night",
+          "occlusion",
+          "score"
+        ],
+        "title": "QualityOut"
+      },
+      "ScheduleImportResult": {
+        "properties": {
+          "object_id": {
+            "type": "string",
+            "title": "Object Id",
+            "description": "Объект, для которого импортирован график"
+          },
+          "imported_count": {
+            "type": "integer",
+            "title": "Imported Count",
+            "description": "Число импортированных работ"
+          },
+          "works": {
+            "items": {
+              "$ref": "#/components/schemas/ScheduleWorkOut"
+            },
+            "type": "array",
+            "title": "Works",
+            "description": "Импортированные работы"
+          }
+        },
+        "type": "object",
+        "required": [
+          "object_id",
+          "imported_count",
+          "works"
+        ],
+        "title": "ScheduleImportResult"
+      },
+      "ScheduleWorkOut": {
+        "properties": {
+          "work_id": {
+            "type": "string",
+            "title": "Work Id",
+            "description": "Идентификатор работы"
+          },
+          "wbs": {
+            "type": "string",
+            "title": "Wbs",
+            "description": "Номер в иерархии графика (WBS)",
+            "default": ""
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Наименование работы"
+          },
+          "work_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Work Type",
+            "description": "Вид работ (ресурсный отпечаток)"
+          },
+          "zone_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zone Id",
+            "description": "Зона выполнения"
+          },
+          "start_plan": {
+            "type": "string",
+            "title": "Start Plan",
+            "description": "Плановая дата начала"
+          },
+          "finish_plan": {
+            "type": "string",
+            "title": "Finish Plan",
+            "description": "Плановая дата окончания"
+          },
+          "volume": {
+            "$ref": "#/components/schemas/VolumeOut"
+          },
+          "planned_mh": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Planned Mh",
+            "description": "Плановые машино-часы по классам техники"
+          },
+          "predecessors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Predecessors",
+            "description": "Работы-предшественники"
+          }
+        },
+        "type": "object",
+        "required": [
+          "work_id",
+          "name",
+          "start_plan",
+          "finish_plan",
+          "volume"
+        ],
+        "title": "ScheduleWorkOut"
+      },
+      "UtilizationRowOut": {
+        "properties": {
+          "zone_id": {
+            "type": "string",
+            "title": "Zone Id"
+          },
+          "cls": {
+            "type": "string",
+            "title": "Cls",
+            "description": "Класс техники"
+          },
+          "mh_present": {
+            "type": "number",
+            "title": "Mh Present",
+            "description": "Часы присутствия на площадке"
+          },
+          "mh_active": {
+            "type": "number",
+            "title": "Mh Active",
+            "description": "Часы фактической работы"
+          },
+          "mh_idle": {
+            "type": "number",
+            "title": "Mh Idle",
+            "description": "Часы простоя"
+          },
+          "utilization": {
+            "type": "number",
+            "title": "Utilization",
+            "description": "КИТ = mh_active / mh_present"
+          },
+          "idle_cost_rub": {
+            "type": "number",
+            "title": "Idle Cost Rub",
+            "description": "Стоимость простоя, ₽"
+          }
+        },
+        "type": "object",
+        "required": [
+          "zone_id",
+          "cls",
+          "mh_present",
+          "mh_active",
+          "mh_idle",
+          "utilization",
+          "idle_cost_rub"
+        ],
+        "title": "UtilizationRowOut"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VolumeOut": {
+        "properties": {
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit",
+            "description": "Единица измерения объёма работ"
+          },
+          "qty": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qty",
+            "description": "Объём работ в этой единице"
+          }
+        },
+        "type": "object",
+        "title": "VolumeOut"
+      },
+      "WorkProgressOut": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date",
+            "description": "Дата, на которую посчитан прогресс"
+          },
+          "work_id": {
+            "type": "string",
+            "title": "Work Id",
+            "description": "Идентификатор работы"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Наименование работы"
+          },
+          "mh_plan_to_date": {
+            "type": "number",
+            "title": "Mh Plan To Date",
+            "description": "План машино-часов нарастающим итогом"
+          },
+          "mh_fact_to_date": {
+            "type": "number",
+            "title": "Mh Fact To Date",
+            "description": "Факт машино-часов нарастающим итогом"
+          },
+          "spi": {
+            "type": "number",
+            "title": "Spi",
+            "description": "Индекс выполнения по срокам = факт / план"
+          },
+          "rate_mh_per_day": {
+            "type": "number",
+            "title": "Rate Mh Per Day",
+            "description": "Текущий темп, маш.-ч/сут"
+          },
+          "forecast_finish": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecast Finish",
+            "description": "Прогнозная дата завершения"
+          },
+          "delay_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delay Days",
+            "description": "Прогнозное отставание, суток"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Светофор: green | yellow | red"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "work_id",
+          "name",
+          "mh_plan_to_date",
+          "mh_fact_to_date",
+          "spi",
+          "rate_mh_per_day",
+          "status"
+        ],
+        "title": "WorkProgressOut"
+      },
+      "ZoneIn": {
+        "properties": {
+          "zone_id": {
+            "type": "string",
+            "title": "Zone Id",
+            "description": "Идентификатор зоны"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Название зоны",
+            "default": ""
+          },
+          "polygon": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Polygon",
+            "description": "Полигон зоны на кадре, [[x,y], ...]"
+          },
+          "area_m2": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area M2",
+            "description": "Площадь зоны, м²"
+          }
+        },
+        "type": "object",
+        "required": [
+          "zone_id",
+          "polygon"
+        ],
+        "title": "ZoneIn"
+      },
+      "ZoneOut": {
+        "properties": {
+          "zone_id": {
+            "type": "string",
+            "title": "Zone Id",
+            "description": "Идентификатор зоны выполнения работ"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Человекочитаемое название зоны",
+            "default": ""
+          },
+          "polygon": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Polygon",
+            "description": "Полигон зоны на кадре, [[x,y], ...]"
+          },
+          "area_m2": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area M2",
+            "description": "Площадь зоны, м²"
+          }
+        },
+        "type": "object",
+        "required": [
+          "zone_id",
+          "polygon"
+        ],
+        "title": "ZoneOut"
+      },
+      "ZonesUpdateResult": {
+        "properties": {
+          "camera_id": {
+            "type": "string",
+            "title": "Camera Id"
+          },
+          "zones": {
+            "items": {
+              "$ref": "#/components/schemas/ZoneOut"
+            },
+            "type": "array",
+            "title": "Zones"
+          }
+        },
+        "type": "object",
+        "required": [
+          "camera_id",
+          "zones"
+        ],
+        "title": "ZonesUpdateResult"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Объекты",
+      "description": "Объекты строительства: камеры, зоны, текущее состояние, график (план vs факт), экономика."
+    },
+    {
+      "name": "Отклонения",
+      "description": "Лента отклонений (Р0-Р4) и карточки с доказательствами и рекомендацией."
+    },
+    {
+      "name": "Камеры",
+      "description": "Разметка зон выполнения работ на кадре камеры."
+    },
+    {
+      "name": "Машина времени",
+      "description": "Проигрывание предрассчитанного периода истории через Server-Sent Events."
+    },
+    {
+      "name": "Служебное",
+      "description": "Проверка живости сервиса."
+    }
+  ]
+}

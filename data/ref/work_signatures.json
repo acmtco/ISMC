@@ -1,0 +1,64 @@
+[
+  {
+    "work_type": "earthworks_excavation",
+    "required": {"excavator": {"min": 1, "typical": 2}},
+    "supporting": {
+      "dump_truck": {"min": 2, "typical": 5},
+      "bulldozer": {"min": 0, "typical": 1}
+    },
+    "forbidden": ["tower_crane", "concrete_pump"],
+    "rhythm": {"metric": "dump_truck_cycles_per_shift", "min": 6, "typical": 12}
+  },
+  {
+    "work_type": "piling",
+    "required": {"drilling_rig": {"min": 1, "typical": 1}},
+    "supporting": {
+      "mobile_crane": {"min": 0, "typical": 1},
+      "concrete_mixer": {"min": 0, "typical": 1}
+    },
+    "forbidden": ["tower_crane", "bulldozer"],
+    "rhythm": {"metric": "drilling_rig_cycles_per_shift", "min": 2, "typical": 4}
+  },
+  {
+    "work_type": "foundation_slab",
+    "required": {"concrete_pump": {"min": 1, "typical": 1}},
+    "supporting": {"concrete_mixer": {"min": 4, "typical": 12}},
+    "forbidden": ["excavator", "tower_crane", "bulldozer"],
+    "rhythm": {"metric": "concrete_mixer_arrivals_per_shift", "min": 8, "typical": 20}
+  },
+  {
+    "work_type": "frame_assembly",
+    "required": {"tower_crane": {"min": 1, "typical": 1}},
+    "supporting": {
+      "mobile_crane": {"min": 0, "typical": 1},
+      "loader": {"min": 0, "typical": 1}
+    },
+    "forbidden": ["excavator", "bulldozer", "drilling_rig"],
+    "rhythm": {"metric": "tower_crane_active_hours_per_shift", "min": 4, "typical": 8}
+  },
+  {
+    "work_type": "backfill",
+    "required": {"bulldozer": {"min": 1, "typical": 1}},
+    "supporting": {
+      "roller": {"min": 0, "typical": 1},
+      "dump_truck": {"min": 0, "typical": 2}
+    },
+    "forbidden": ["tower_crane", "concrete_pump"],
+    "rhythm": {"metric": "dump_truck_cycles_per_shift", "min": 2, "typical": 6}
+  },
+  {
+    "work_type": "facade",
+    "required": {},
+    "supporting": {},
+    "forbidden": ["excavator", "bulldozer", "drilling_rig"],
+    "rhythm": null,
+    "note": "Ключевая техника по ТЗ — подъёмник; такого класса нет в перечне распознаваемых (docs/02, раздел 3) и в перечне людей (CLAUDE.md, «чего не делаем»). Машино-часами этот вид работ система не измеряет: cover(w) для него всегда 0, отклонения по нему не формируются."
+  },
+  {
+    "work_type": "utilities",
+    "required": {"excavator": {"min": 1, "typical": 1}},
+    "supporting": {"mobile_crane": {"min": 0, "typical": 1}},
+    "forbidden": ["tower_crane"],
+    "rhythm": {"metric": "excavator_active_hours_per_shift", "min": 1, "typical": 3}
+  }
+]

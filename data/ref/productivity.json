@@ -1,0 +1,27 @@
+{
+  "_source": "Оценочные нормы выработки, требуют сверки с ЕНиР/ГЭСН перед публикацией цифр (docs/04-metrics.md). Используются только когда plannded_mh нет в исходном графике (docs/02, раздел 2): planned_mh[c] = qty / productivity_per_mh[c].",
+  "earthworks_excavation": {
+    "unit": "м3",
+    "productivity_per_mh": {"excavator": 66.0, "dump_truck": 28.0, "bulldozer": 200.0}
+  },
+  "piling": {
+    "unit": "п.м",
+    "productivity_per_mh": {"drilling_rig": 3.0, "mobile_crane": 6.0, "concrete_mixer": 8.0}
+  },
+  "foundation_slab": {
+    "unit": "м3",
+    "productivity_per_mh": {"concrete_pump": 8.0, "concrete_mixer": 6.0}
+  },
+  "frame_assembly": {
+    "unit": "т",
+    "productivity_per_mh": {"tower_crane": 2.5, "mobile_crane": 3.0, "loader": 4.0}
+  },
+  "backfill": {
+    "unit": "м3",
+    "productivity_per_mh": {"bulldozer": 40.0, "roller": 60.0, "dump_truck": 30.0}
+  },
+  "utilities": {
+    "unit": "п.м",
+    "productivity_per_mh": {"excavator": 5.0, "mobile_crane": 10.0}
+  }
+}
