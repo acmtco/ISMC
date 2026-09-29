@@ -1,0 +1,28 @@
+[
+  {
+    "work_id": "W-014",
+    "name": "earthworks_excavation",
+    "work_type": "earthworks_excavation",
+    "zone_id": "Z-PIT",
+    "start_plan": "2026-09-15",
+    "finish_plan": "2026-10-02",
+    "planned_mh": {
+      "excavator": 234.0,
+      "dump_truck": 495.0,
+      "bulldozer": 72.0
+    }
+  },
+  {
+    "work_id": "W-101",
+    "name": "frame_assembly",
+    "work_type": "frame_assembly",
+    "zone_id": "Z-FRAME",
+    "start_plan": "2026-09-08",
+    "finish_plan": "2026-10-07",
+    "planned_mh": {
+      "tower_crane": 150.0,
+      "mobile_crane": 105.0,
+      "loader": 120.0
+    }
+  }
+]

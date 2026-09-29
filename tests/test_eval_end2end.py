@@ -43,8 +43,44 @@ def test_main_generates_benchmark_when_missing_and_writes_report(small_run):
     assert (img_dir / "deviation_precision_recall.png").exists()
 
 
-def test_main_reports_missing_detector_weights_honestly(small_run):
-    out, _ = small_run
+def test_main_reports_missing_detector_weights_honestly(tmp_path):
+    """Условие «весов нет» тест создаёт сам — отдельным конфигом перцепции с
+    несуществующим путём. Полагаться на пустой `models/` в репозитории нельзя:
+    после первого же обучения детектора тест начал бы падать не потому, что
+    сломалось поведение, а потому, что веса появились."""
+    perception_config = tmp_path / "perception.yaml"
+    perception_config.write_text(
+        Path("config/perception.yaml")
+        .read_text(encoding="utf-8")
+        .replace(
+            "weights_path: models/yolo11n_construction.pt",
+            f"weights_path: {tmp_path / 'absent-weights.pt'}",
+        ),
+        encoding="utf-8",
+    )
+
+    out = tmp_path / "metrics.md"
+    eval_end2end.main(
+        [
+            "--scenario",
+            "data/ref/scenario_demo.yaml",
+            "--benchmark-dir",
+            str(tmp_path / "bench"),
+            "--frames-dir",
+            str(tmp_path / "frames"),
+            "--sprites-dir",
+            str(tmp_path / "sprites"),
+            "--perception-config",
+            str(perception_config),
+            "--days",
+            "5",
+            "--out",
+            str(out),
+            "--img-dir",
+            str(tmp_path / "img"),
+        ]
+    )
+
     content = out.read_text(encoding="utf-8")
     assert "нет в репозитории" in content
     assert "MOTA | — |" in content

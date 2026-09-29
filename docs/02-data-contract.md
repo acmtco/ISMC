@@ -92,8 +92,21 @@
 ```
 
 `cls` ∈ `excavator` | `dump_truck` | `concrete_mixer` | `concrete_pump` |
-`tower_crane` | `mobile_crane` | `bulldozer` | `roller` | `loader` |
-`drilling_rig` | `worker`
+`tower_crane` | `mobile_crane` | `knuckle_boom_crane` | `bulldozer` |
+`roller` | `loader` | `drilling_rig` | `truck` | `worker`
+
+Восемь классов из ТЗ (раздел 6.2) покрыты полностью: самосвал `dump_truck`,
+экскаватор `excavator`, каток `roller`, кран-манипулятор
+`knuckle_boom_crane`, бетоносмеситель `concrete_mixer`, бульдозер
+`bulldozer`, грузовик `truck`, автокран `mobile_crane`. Остальные —
+расширение перечня, которое ТЗ прямо разрешает («участники могут расширить
+перечень техники»): они нужны ресурсным отпечаткам работ из справочника ДГП
+(`tower_crane` для монтажа каркаса, `drilling_rig` для свайных работ,
+`concrete_pump` для бетонирования, `loader` для погрузочных работ).
+
+`truck` — бортовой/грузовой автомобиль общего назначения, в отличие от
+`dump_truck` (самосвал с опрокидывающимся кузовом): для ресурсного
+отпечатка это разные ресурсы, самосвал возит грунт, грузовик — материалы.
 
 `state` ∈ `active` | `idle` | `parked` | `unknown`
 

@@ -29,3 +29,11 @@ models/*.onnx
 
 .DS_Store
 web/tsconfig.tsbuildinfo
+
+# ТЗ конкурса конфиденциально (CLAUDE.md, правило 7)
+docs/tz/
+
+# Артефакты обучения ultralytics — воспроизводятся scripts/train_detector.py
+runs/
+# Базовые веса YOLO, скачиваются автоматически при обучении
+yolo11*.pt

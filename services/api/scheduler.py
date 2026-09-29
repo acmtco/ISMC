@@ -163,6 +163,12 @@ def recompute_object(session: Session, object_id: str, camera_ids: list[str]) ->
     mh_query = select(MachineHourRecord).where(MachineHourRecord.object_id == object_id)
     for row in session.exec(mh_query).all():
         session.delete(row)
+    # Сброс удалений до вставки обязателен: у `machine_hours` уникальный ключ
+    # (дата, объект, зона, класс), и при повторном пересчёте новая строка
+    # совпадает со старой. Без flush автосброс выполнит INSERT раньше DELETE
+    # и упрётся в constraint — то есть ночной пересчёт падал бы каждый раз,
+    # кроме самого первого.
+    session.flush()
     for row in mh_rows:
         session.add(MachineHourRecord.from_row(row))
 
@@ -193,6 +199,10 @@ def recompute_object(session: Session, object_id: str, camera_ids: list[str]) ->
     dev_query = select(DeviationRecord).where(DeviationRecord.object_id == object_id)
     for row in session.exec(dev_query).all():
         session.delete(row)
+    # Та же причина, что и у `machine_hours` выше: `deviation_id` детерминирован
+    # (тип + зона + период), поэтому при повторном пересчёте он совпадает с уже
+    # существующим первичным ключом.
+    session.flush()
     for dev in deviations:
         session.add(
             DeviationRecord(

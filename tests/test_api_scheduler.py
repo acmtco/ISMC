@@ -111,6 +111,53 @@ def test_recompute_object_creates_machine_hours_and_deviation(api_env):
         assert any(d.type == "R1_resource_gap" for d in deviations)
 
 
+def test_recompute_object_is_idempotent(api_env):
+    """Ночной пересчёт выполняется каждые сутки по одному и тому же объекту.
+    У `machine_hours` уникальный ключ (дата, объект, зона, класс), а
+    `deviation_id` детерминирован — поэтому второй прогон обязан заместить
+    строки первого, а не упасть на constraint и не удвоить их."""
+    init_db()
+    with Session(get_engine()) as session:
+        session.add(ObjectRecord(object_id="OBJ-TWICE", name="Дважды"))
+        session.add(
+            ScheduleWorkRecord(
+                work_id="W-001",
+                object_id="OBJ-TWICE",
+                name="Разработка котлована",
+                work_type="earthworks_excavation",
+                zone_id="Z-PIT",
+                start_plan="2026-09-01",
+                finish_plan="2026-09-10",
+                planned_mh={"excavator": 20.0},
+            )
+        )
+        session.commit()
+
+    records = [_detection_record(f"2026-09-0{i + 1}T07:00:00+03:00") for i in range(6)]
+    _write_detections(config.detections_path("CAM-01"), records)
+
+    with Session(get_engine()) as session:
+        first = recompute_object(session, "OBJ-TWICE", ["CAM-01"])
+        mh_after_first = len(
+            session.exec(
+                select(MachineHourRecord).where(MachineHourRecord.object_id == "OBJ-TWICE")
+            ).all()
+        )
+
+    with Session(get_engine()) as session:
+        second = recompute_object(session, "OBJ-TWICE", ["CAM-01"])
+        mh_after_second = session.exec(
+            select(MachineHourRecord).where(MachineHourRecord.object_id == "OBJ-TWICE")
+        ).all()
+        deviations = session.exec(
+            select(DeviationRecord).where(DeviationRecord.object_id == "OBJ-TWICE")
+        ).all()
+
+    assert second == first
+    assert len(mh_after_second) == mh_after_first
+    assert len({d.deviation_id for d in deviations}) == len(deviations)
+
+
 def test_recompute_object_returns_zero_without_detections(api_env):
     init_db()
     with Session(get_engine()) as session:
