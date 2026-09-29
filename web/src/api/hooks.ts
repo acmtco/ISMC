@@ -1,5 +1,5 @@
 /** react-query хуки поверх типизированного клиента. Каждый запрос обязан
- * иметь демо-фолбэк (CLAUDE.md, правило 3: демо не имеет права упасть) —
+ * иметь демо-фолбэк (docs/01-principles.md, правило 3: демо не имеет права упасть) —
  * `withFallback` тихо переключает на `demo-data.ts`, если бэкенд недоступен
  * или ответил ошибкой; `isDemo` в результате красит баннер в UI. */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

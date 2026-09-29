@@ -2,7 +2,7 @@
 
 Веса — результат обучения (`notebooks/`, см. `docs/04-metrics.md`), в
 репозитории их нет: если файл не найден, `Detector` честно падает с понятным
-сообщением (CLAUDE.md, правило 4), а не тихо скачивает generic-модель из
+сообщением (docs/01-principles.md, правило 4), а не тихо скачивает generic-модель из
 интернета (правило 2 — без интернета).
 """
 from __future__ import annotations
@@ -72,7 +72,7 @@ class Detector:
             raise FileNotFoundError(
                 f"веса детектора не найдены: {self.config.weights_path}. "
                 "Обучите модель (notebooks/) перед запуском — generic-модель "
-                "из интернета не скачивается (CLAUDE.md, правило 2)."
+                "из интернета не скачивается (docs/01-principles.md, правило 2)."
             )
         from ultralytics import YOLO
 

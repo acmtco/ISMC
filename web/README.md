@@ -28,7 +28,7 @@ make generate-api   # из корня репозитория; см. Makefile
 `src/api/hooks.ts` оборачивает каждый запрос в демо-фолбэк
 (`src/api/demo-data.ts`) — если бэкенд недоступен или отвечает ошибкой,
 экран показывает демонстрационные данные с явным баннером, а не падает
-(CLAUDE.md, правило 3).
+(docs/01-principles.md, правило 3).
 
 Стек: React 18 + Vite + TypeScript + Tailwind + shadcn-style компоненты
 (Radix + class-variance-authority) + Recharts + `@tanstack/react-query`.

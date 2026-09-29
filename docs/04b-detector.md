@@ -8,7 +8,9 @@
 Обучающих изображений: 178, проверочных: 45.
 
 Источники разметки:
-- `/private/tmp/claude-501/-Users-acmtco-Desktop-Claude-Code------------------------------------------------------------7-/bdac0fb3-706e-4e21-bde7-30817738381b/scratchpad/cmid/excavator-dataset-223img-yolo`
+- `excavator-dataset-223img-yolo`
+
+Происхождение набора: https://github.com/miniexcav/Construction-Machines-Images-Dataset
 
 ## Сводно
 

@@ -1,7 +1,7 @@
 """Источники кадров: RTSP/HLS (`live`) и папка/replay (`replay`).
 
 Смена режима — `HG_MODE` + `source.kind` в `objects.json`, не правка кода
-(CLAUDE.md, правило 3). Общий интерфейс — `FrameSource.iter_frames()`,
+(docs/01-principles.md, правило 3). Общий интерфейс — `FrameSource.iter_frames()`,
 отдающий `(ts, image)` в порядке съёмки.
 """
 from __future__ import annotations

@@ -1,6 +1,6 @@
 """Покрытие scripts/make_synthetic.py на 3 сутки бенчмарка.
 
-Проверяет то, что важно для честного ground truth (CLAUDE.md, правило 6):
+Проверяет то, что важно для честного ground truth (docs/01-principles.md, правило 6):
 формат кадров и JSONL по контракту (docs/02-data-contract.md), уважение
 --days, и детерминированность по seed (иначе метрики в docs/04 не
 воспроизводимы).

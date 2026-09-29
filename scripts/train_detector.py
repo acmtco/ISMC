@@ -2,7 +2,7 @@
 готовых моделей для обнаружения объектов и их дообучение»).
 
 Датасет собирается из двух источников, оба — локальные папки, скачивание
-внутри скрипта не выполняется (CLAUDE.md, правило 2):
+внутри скрипта не выполняется (docs/01-principles.md, правило 2):
 
 - открытый размеченный набор в YOLO-формате (`--yolo-dir`): пары
   `<имя>.jpg` + `<имя>.txt`, где txt — строки `cls cx cy w h` в долях кадра;
@@ -15,7 +15,7 @@
 Результат — `models/yolo11n_construction.pt`, путь к которому ждёт
 `config/perception.yaml`. Метрики печатаются в консоль и сохраняются
 ultralytics в `runs/`; в `docs/04-metrics.md` они попадают только через
-`scripts/eval_end2end.py` (CLAUDE.md, Definition of Done).
+`scripts/eval_end2end.py` (docs/01-principles.md, Definition of Done).
 """
 from __future__ import annotations
 
@@ -134,9 +134,10 @@ def write_report(
     weights: str,
     epochs: int,
     sources: list[str],
+    note: str = "",
 ) -> None:
     """Отчёт по обучению — так же, как `docs/04-metrics.md`, заполняется
-    только скриптом. Руками числа сюда не пишем (CLAUDE.md, Definition of
+    только скриптом. Руками числа сюда не пишем (docs/01-principles.md, Definition of
     Done)."""
     per_class = []
     names = metrics.names if hasattr(metrics, "names") else {}
@@ -162,6 +163,7 @@ def write_report(
                 "",
                 "Источники разметки:",
                 *[f"- `{s}`" for s in sources],
+                *(["", f"Происхождение набора: {note}"] if note else []),
                 "",
                 "## Сводно",
                 "",
@@ -196,6 +198,11 @@ def write_report(
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--yolo-dir", type=Path, required=True, help="открытый набор YOLO")
+    parser.add_argument(
+        "--source-note",
+        default="",
+        help="откуда взят набор — попадает в отчёт как ссылка на источник",
+    )
     parser.add_argument("--class-map", default="0=excavator", help="переназначение классов")
     parser.add_argument("--extra-dir", type=Path, help="своя разметка (те же классы, что у нас)")
     parser.add_argument("--out-dir", type=Path, default=Path("data/interim/det"))
@@ -251,7 +258,8 @@ def main(argv: list[str] | None = None) -> None:
         n_val=n_val,
         weights=args.weights,
         epochs=args.epochs,
-        sources=[str(d) for d, _ in sources],
+        sources=[d.name for d, _ in sources],
+        note=args.source_note,
     )
     print(f"отчёт записан: {args.report}")
 

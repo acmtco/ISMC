@@ -171,7 +171,7 @@ def derive_planned_mh(
 
     None, если вид работ не распознан, нормы для него нет, или единица
     измерения в графике не совпадает с единицей нормы — честнее не считать,
-    чем посчитать неверно (CLAUDE.md, правило 4)."""
+    чем посчитать неверно (docs/01-principles.md, правило 4)."""
     if work_type is None or work_type not in productivity.by_work_type:
         return None
     ref = productivity.by_work_type[work_type]

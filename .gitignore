@@ -30,7 +30,7 @@ models/*.onnx
 .DS_Store
 web/tsconfig.tsbuildinfo
 
-# ТЗ конкурса конфиденциально (CLAUDE.md, правило 7)
+# ТЗ конкурса конфиденциально (docs/01-principles.md, правило 7)
 docs/tz/
 
 # Артефакты обучения ultralytics — воспроизводятся scripts/train_detector.py

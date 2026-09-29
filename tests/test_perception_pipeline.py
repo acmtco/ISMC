@@ -17,7 +17,7 @@ from services.perception.zones import Zone as PerceptionZone
 class _GroundTruthTracker:
     """Подменяет YOLO+BoT-SORT: отдаёт истинные боксы синтетики как "детекции"
     текущего кадра — так тест проверяет склейку/зоны/состояние/запись без
-    реальной модели (CLAUDE.md, правило 2: без сети и GPU)."""
+    реальной модели (docs/01-principles.md, правило 2: без сети и GPU)."""
 
     def __init__(self, records_by_ts: dict[str, list[dict]]) -> None:
         self.records_by_ts = records_by_ts
