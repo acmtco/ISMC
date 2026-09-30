@@ -25,9 +25,12 @@ RUN apt-get update \
 
 WORKDIR /app
 
-COPY pyproject.toml ./
+COPY pyproject.toml README.md ./
 COPY services ./services
 COPY scripts ./scripts
+# Без extras: сервису не нужны ни обучение детектора, ни генерация синтетики,
+# ни построение графиков. Это убирает из образа PyTorch и экономит около
+# полугигабайта, что особенно заметно при сборке на ARM.
 RUN pip install --no-cache-dir .
 
 COPY config ./config

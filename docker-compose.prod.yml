@@ -1,0 +1,55 @@
+# Развёртывание на собственном сервере.
+#
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Два контейнера: приложение и Caddy перед ним. Caddy сам получает и
+# продлевает сертификат Let's Encrypt для домена из переменной HG_DOMAIN,
+# поэтому возиться с certbot не нужно.
+#
+# Данные лежат в именованном томе: база переживает пересборку образа,
+# в отличие от развёртывания на эфемерной файловой системе.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      HG_MODE: "${HG_MODE:-replay}"
+      HG_OBJECT_ID: "${HG_OBJECT_ID:-OBJ-001}"
+      HG_LOG_LEVEL: "${HG_LOG_LEVEL:-INFO}"
+      # Том монтируется в /app/data, туда же указывает база.
+      HG_DATA_DIR: /app/data
+      HG_DB_URL: sqlite:////app/data/hronograf.db
+    volumes:
+      - hronograf-data:/app/data
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      HG_DOMAIN: "${HG_DOMAIN:?укажите домен в .env, например HG_DOMAIN=ismc.example.ru}"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  hronograf-data:
+  caddy-data:
+  caddy-config:
