@@ -102,12 +102,18 @@ pip install ".[dev]"     # всё вместе плюс тесты и линте
 
 ## Развёртывание
 
-На сервере с Docker:
+Если на сервере уже есть nginx с другими сайтами — приложение слушает
+только localhost, наружу его отдаёт ваш nginx:
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --build app
+sudo cp deploy/nginx/hronograf.conf /etc/nginx/sites-available/hronograf
+```
+
+На пустом сервере Caddy сам выпустит и продлит сертификат:
 
 ```bash
 echo "HG_DOMAIN=ваш.домен" > .env
-docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml --profile tls up -d --build
 ```
-
-Сертификат Let's Encrypt выпускается и продлевается автоматически.
 Подробнее — [docs/07-deploy.md](docs/07-deploy.md).

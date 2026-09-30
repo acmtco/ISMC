@@ -1,10 +1,19 @@
-# Развёртывание на собственном сервере.
+# Развёртывание на собственном сервере. Два режима.
 #
-#   docker compose -f docker-compose.prod.yml up -d --build
+# 1. На сервере уже стоит nginx с другими сайтами — порты 80 и 443 заняты:
 #
-# Два контейнера: приложение и Caddy перед ним. Caddy сам получает и
-# продлевает сертификат Let's Encrypt для домена из переменной HG_DOMAIN,
-# поэтому возиться с certbot не нужно.
+#      docker compose -f docker-compose.prod.yml up -d --build app
+#
+#    Приложение слушает 127.0.0.1:8000 и снаружи недоступно; наружу его
+#    отдаёт ваш nginx (готовый конфиг — `deploy/nginx/hronograf.conf`),
+#    он же занимается сертификатом.
+#
+# 2. Сервер пустой, порты свободны:
+#
+#      docker compose -f docker-compose.prod.yml --profile tls up -d --build
+#
+#    Дополнительно поднимется Caddy, который сам получит и продлит
+#    сертификат Let's Encrypt для домена из HG_DOMAIN.
 #
 # Данные лежат в именованном томе: база переживает пересборку образа,
 # в отличие от развёртывания на эфемерной файловой системе.
@@ -24,8 +33,11 @@ services:
       HG_DB_URL: sqlite:////app/data/hronograf.db
     volumes:
       - hronograf-data:/app/data
-    expose:
-      - "8000"
+    # Привязка к 127.0.0.1 обязательна: иначе Docker открыл бы порт на всех
+    # интерфейсах в обход брандмауэра, и приложение торчало бы наружу без
+    # сертификата. Так до него дотянется только nginx с этой же машины.
+    ports:
+      - "127.0.0.1:${HG_PORT:-8000}:8000"
     healthcheck:
       test: ["CMD", "python", "-c",
              "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
@@ -34,8 +46,11 @@ services:
       retries: 3
       start_period: 40s
 
+  # Нужен только когда порты 80 и 443 свободны. Если на сервере уже есть
+  # nginx, этот сервис не запускается: профиль tls по умолчанию выключен.
   caddy:
     image: caddy:2-alpine
+    profiles: ["tls"]
     restart: unless-stopped
     depends_on:
       - app

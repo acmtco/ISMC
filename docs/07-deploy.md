@@ -1,13 +1,99 @@
 # Развёртывание на сервере
 
-Инструкция для Oracle Cloud Always Free, но подходит любому серверу с
-Ubuntu и Docker: Timeweb, Selectel, Yandex Cloud.
-
 Приложение собирается в один образ: интерфейс и API отвечают с одного
-адреса. Перед ним стоит Caddy, который сам получает и продлевает
-сертификат Let's Encrypt.
+адреса. Дальше два пути, в зависимости от того, занят ли на сервере
+веб-сервером порт 443.
 
-## 1. Сервер
+- **На сервере уже есть nginx с другими сайтами** — раздел «Рядом с
+  существующим nginx». Наш контейнер слушает только localhost, наружу его
+  отдаёт ваш nginx, он же выпускает сертификат.
+- **Сервер пустой** — раздел «На пустом сервере». Поднимается Caddy,
+  который сам получает и продлевает сертификат Let's Encrypt.
+
+---
+
+# Рядом с существующим nginx
+
+Сайты, которые уже работают на сервере, этот способ не затрагивает.
+
+## 1. Домен
+
+В Cloudflare создайте запись для поддомена:
+
+| Поле | Значение |
+|---|---|
+| Тип | `A` |
+| Имя | `ismc` |
+| Значение | публичный IP сервера |
+| Проксирование | **выключено**, серое облако |
+
+Проксирование на время выпуска сертификата нужно выключить, иначе certbot
+не пройдёт проверку владения доменом. Включить обратно можно потом, выбрав
+режим шифрования Full (strict).
+
+Дождитесь, пока запись разойдётся: `dig +short ismc.urbanconstruction.ru`
+должен вернуть IP сервера.
+
+## 2. Приложение
+
+```bash
+git clone https://github.com/acmtco/ISMC.git && cd ISMC
+docker compose -f docker-compose.prod.yml up -d --build app
+```
+
+Собирается 5–10 минут. Контейнер слушает `127.0.0.1:8000` и снаружи
+недоступен — это намеренно. Проверка с самого сервера:
+
+```bash
+curl -s http://127.0.0.1:8000/health
+```
+
+Ожидаемый ответ — `{"status":"ok"}`.
+
+Если порт 8000 на сервере занят, задайте другой в `.env`: `HG_PORT=8010`,
+и поправьте `proxy_pass` в конфиге nginx на тот же номер.
+
+## 3. nginx
+
+```bash
+sudo cp deploy/nginx/hronograf.conf /etc/nginx/sites-available/hronograf
+sudo sed -i 's/ismc.example.ru/ismc.urbanconstruction.ru/' \
+    /etc/nginx/sites-available/hronograf
+sudo ln -s /etc/nginx/sites-available/hronograf /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+`nginx -t` обязателен: он проверит, что конфигурация цела, и вы не уроните
+остальные сайты.
+
+## 4. Сертификат
+
+```bash
+sudo certbot --nginx -d ismc.urbanconstruction.ru
+```
+
+Certbot сам допишет блок для 443 и перенаправление с http. Продление уже
+настроено системным таймером, ничего добавлять не нужно.
+
+Готово: https://ismc.urbanconstruction.ru
+
+## Обновление
+
+```bash
+cd ISMC && git pull
+docker compose -f docker-compose.prod.yml up -d --build app
+```
+
+---
+
+# На пустом сервере
+
+Если порты 80 и 443 свободны, nginx не нужен: Caddy сделает всё сам.
+
+## Сервер
+
+Годится любой с Ubuntu и Docker. Инструкция ниже написана под Oracle Cloud
+Always Free, но шаги те же для Timeweb, Selectel и Yandex Cloud.
 
 В панели Oracle Cloud: **Compute → Instances → Create Instance**.
 
@@ -69,7 +155,7 @@ dig +short ismc.example.ru
 ```bash
 git clone https://github.com/acmtco/ISMC.git && cd ISMC
 echo "HG_DOMAIN=ismc.example.ru" > .env
-docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml --profile tls up -d --build
 ```
 
 Первая сборка занимает 5–10 минут: ставятся зависимости и собирается
