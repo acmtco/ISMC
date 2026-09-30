@@ -1,0 +1,27 @@
+# Описание развёртывания для Render (Blueprint).
+#
+# Один сервис на всё приложение: интерфейс и API отвечают с одного адреса,
+# поэтому не нужен ни второй сервис, ни настройка CORS.
+#
+# База данных — SQLite внутри контейнера. Файловая система на Render
+# эфемерна, и при каждом деплое база создаётся заново; приложение при старте
+# само пересчитывает машино-часы и отклонения из `data/interim/detections/`
+# (см. `_bootstrap_demo` в `services/api/main.py`). Для демонстрации этого
+# достаточно. Для постоянного хранения нужен PostgreSQL: подключается сменой
+# одной переменной `HG_DB_URL`, правки кода не требуется.
+
+services:
+  - type: web
+    name: hronograf
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: frankfurt
+    healthCheckPath: /health
+    envVars:
+      - key: HG_MODE
+        value: replay
+      - key: HG_OBJECT_ID
+        value: OBJ-001
+      - key: HG_LOG_LEVEL
+        value: INFO
