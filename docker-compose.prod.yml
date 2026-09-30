@@ -55,7 +55,11 @@ services:
     depends_on:
       - app
     environment:
-      HG_DOMAIN: "${HG_DOMAIN:?укажите домен в .env, например HG_DOMAIN=ismc.example.ru}"
+      # Подстановка значения по умолчанию, а не обязательная переменная:
+      # compose разбирает весь файл целиком, даже когда поднимают только
+      # `app`, и требование здесь ломало бы запуск рядом с nginx, где Caddy
+      # вообще не нужен. При запуске профиля tls домен задают в .env.
+      HG_DOMAIN: "${HG_DOMAIN:-localhost}"
     ports:
       - "80:80"
       - "443:443"
